@@ -6,9 +6,13 @@ from tools import (
     calculate_relative_datetime,
     parse_relative_datetime
 )
+from memory import load_memory, save_memory
 
 # The script starts by initializing an empty list called `conversation` to keep track of the conversation history. It then prompts the user for their name and greets them. The main conversation loop continues until the user types "quit". Within the loop, the user's message is appended to the conversation, and the `choose_tool` function is called to determine if a specific tool should be used to respond. Depending on the decision, the appropriate tool function is called, and the result is appended to the conversation. Finally, a response is generated using `generate_response`, which is also appended to the conversation and printed to the console.
 conversation = []
+
+# Load memory from the memory.json file. If the file does not exist, an empty dictionary is returned. The memory is used to store information that the assistant can remember during the conversation.
+memory = load_memory()
 
 # This is a simple Python script that interacts with the user by asking for their name and then greeting them.
 name = input("What is your name? ")
@@ -23,6 +27,18 @@ while True:
     if message.lower() == "quit":
         print("Goodbye!")
         break   
+
+    if message.lower().startswith("remember "):
+        fact = message[len("remember "):]
+
+        if "facts" not in memory:
+            memory["facts"] = []
+
+        memory["facts"].append(fact)
+        save_memory(memory)
+
+        print("I will remember that.")
+        continue
 
 # The user's message is appended to the conversation list with the role of "user". The `generate_response` function is called with the updated conversation, and the model generates a response. The response is then appended to the conversation list with the role of "assistant" and printed to the console.
     conversation.append(
@@ -73,19 +89,35 @@ while True:
         tool_result = calculate(message)
 
         response = tool_result
-        
+
         conversation.append(
             {
                 "role": "assistant",
                 "content": response
             }
         )
-    response = generate_response(conversation)
+
+        print(response)
+        continue
+
+    model_context = conversation.copy()
+
+    if memory.get("facts"):
+        model_context.insert(
+            0,
+            {
+                "role": "system",
+                "content": (
+                    "Long-term memories about the user:\n"
+                    + "\n".join(f"- {fact}" for fact in memory["facts"])
+                )
+            }
+        )
+
+    response = generate_response(model_context)
 
     conversation.append(
         {"role": "assistant", "content": response}
     )
 
     print(response)
-    continue
-
