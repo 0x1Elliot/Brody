@@ -1,6 +1,6 @@
 # This is a simple Python script that interacts with the user by asking for their name and then greeting them. It also maintains a conversation history and generates responses using a language model.
-from model import generate_response, should_use_datetime
-from tools import get_current_datetime
+from model import generate_response, choose_tool
+from tools import get_current_datetime, calculate
 
 # The script starts by initializing an empty conversation list to keep track of the conversation history. It then prompts the user for their name and greets them. The main conversation loop continues until the user types "quit". For each user message, it checks if the message requires the current date and time using the `should_use_datetime` function. If so, it retrieves the current date and time using `get_current_datetime` and appends it to the conversation. The user's message is then added to the conversation, and a response is generated using the `generate_response` function. The response is also added to the conversation and printed to the console.
 conversation = []
@@ -24,16 +24,26 @@ while True:
         {"role": "user", "content": message}
     )
 
-# The `should_use_datetime` function is called with the user's message to determine if the current date and time should be included in the response. If the decision is "USE_DATETIME", the current date and time are retrieved using `get_current_datetime`, and a message containing this information is appended to the conversation.
-    decision = should_use_datetime(message)
+# The `choose_tool` function is called with the user's message to determine if a specific tool should be used to respond. If the decision is "DATETIME", the current date and time is retrieved using `get_current_datetime`, and the result is appended to the conversation. If the decision is "CALCULATOR", the `calculate` function is called with the user's message, and the result is appended to the conversation. Finally, a response is generated using `generate_response`, and it is appended to the conversation and printed to the console.
+    decision = choose_tool(message)
 
-    if decision == "USE_DATETIME":
+    if decision == "DATETIME":
         tool_result = get_current_datetime()
         
         conversation.append(
             {
                 "role": "user",
-                "content": f"Current date and/or time from tool: {tool_result}"
+                "content": f"Tool result: {tool_result}"
+            }
+        )
+
+    elif decision == "CALCULATOR":
+        tool_result = calculate(message)
+        
+        conversation.append(
+            {
+                "role": "user",
+                "content": f"Tool result: {tool_result}"
             }
         )
     response = generate_response(conversation)

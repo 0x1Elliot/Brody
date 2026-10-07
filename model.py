@@ -33,13 +33,30 @@ def generate_response(conversation):
     return response
 
 
-def should_use_datetime(message):
+# The 'choose_tool' function takes a user message as input and determines which tool (if any) should be used to respond to the message. It formats the input message into a prompt using the tokenizer and generates a decision using the loaded model. The decision is returned as a string, which can be "NO_TOOL", "DATETIME", or "CALCULATOR".
+def choose_tool(message):
     messages = [
         {
             "role": "system",
             "content": (
-                "Decide whether the user's message requires the current real-world date and/or time."
-                "Respond with exactly USE_DATETIME or NO_TOOL."
+                "You are a tool router."
+                "Do not answer the user's question."
+
+                "Return exactly one of these labels and nothing else:\n"
+                "DATETIME - if the user is asking for the current date and time.\n"
+                "CALCULATOR - if the user is asking to perform a calculation.\n"
+                "NO_TOOL - if the user is asking a question that does not require a tool.\n\n"
+
+                "Examples:\n"
+                "User: What time is it? -> DATETIME\n"
+                "User: What is today's date? -> DATETIME\n"
+                "User: 25 * 150 -> CALCULATOR\n"
+                "User: What is 400 divided bty 4.5? -> CALCULATOR\n"
+                "User: What is the capital of France? -> NO_TOOL\n"
+                "User: Who is the president of the United States? -> NO_TOOL\n"
+                "User: Tell me about wolves. -> NO_TOOL\n"
+
+                "Return the label only."
             )
         },
         {
@@ -59,7 +76,7 @@ def should_use_datetime(message):
         model,
         tokenizer,
         prompt=prompt,
-        max_tokens=10
+        max_tokens=5
     )
 
     return decision.strip()
