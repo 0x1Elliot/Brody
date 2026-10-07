@@ -1,8 +1,13 @@
-# This is a simple Python script that interacts with the user by asking for their name and then greeting them. It also maintains a conversation history and generates responses using a language model.
+# This is a simple Python script that interacts with the user by asking for their name and then greeting them. It uses a language model to generate responses based on the user's input and can also utilize specific tools for certain tasks, such as retrieving the current date and time or performing calculations.
 from model import generate_response, choose_tool
-from tools import get_current_datetime, calculate
+from tools import (
+    get_current_datetime,
+    calculate,
+    calculate_relative_datetime,
+    parse_relative_datetime
+)
 
-# The script starts by initializing an empty conversation list to keep track of the conversation history. It then prompts the user for their name and greets them. The main conversation loop continues until the user types "quit". For each user message, it checks if the message requires the current date and time using the `should_use_datetime` function. If so, it retrieves the current date and time using `get_current_datetime` and appends it to the conversation. The user's message is then added to the conversation, and a response is generated using the `generate_response` function. The response is also added to the conversation and printed to the console.
+# The script starts by initializing an empty list called `conversation` to keep track of the conversation history. It then prompts the user for their name and greets them. The main conversation loop continues until the user types "quit". Within the loop, the user's message is appended to the conversation, and the `choose_tool` function is called to determine if a specific tool should be used to respond. Depending on the decision, the appropriate tool function is called, and the result is appended to the conversation. Finally, a response is generated using `generate_response`, which is also appended to the conversation and printed to the console.
 conversation = []
 
 # This is a simple Python script that interacts with the user by asking for their name and then greeting them.
@@ -29,21 +34,50 @@ while True:
 
     if decision == "DATETIME":
         tool_result = get_current_datetime()
-        
+
+        response = tool_result
+
         conversation.append(
             {
-                "role": "user",
-                "content": f"Tool result: {tool_result}"
+                "role": "assistant",
+                "content": response
             }
         )
 
+        print(response)
+        continue
+
+    elif decision == "RELATIVE_DATETIME":
+        offsets = parse_relative_datetime(message)
+
+        tool_result = calculate_relative_datetime(
+            years=offsets["years"],
+            days=offsets["days"],
+            hours=offsets["hours"],
+            minutes=offsets["minutes"]
+        )
+
+        response = tool_result
+
+        conversation.append(
+            {
+                "role": "assistant",
+                "content": response
+            }
+        )
+
+        print(response)
+        continue
+
     elif decision == "CALCULATOR":
         tool_result = calculate(message)
+
+        response = tool_result
         
         conversation.append(
             {
-                "role": "user",
-                "content": f"Tool result: {tool_result}"
+                "role": "assistant",
+                "content": response
             }
         )
     response = generate_response(conversation)
@@ -51,5 +85,7 @@ while True:
     conversation.append(
         {"role": "assistant", "content": response}
     )
+
     print(response)
+    continue
 

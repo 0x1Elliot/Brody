@@ -41,9 +41,10 @@ def choose_tool(message):
             "content": (
                 "You are a tool router."
                 "Do not answer the user's question."
-
                 "Return exactly one of these labels and nothing else:\n"
+
                 "DATETIME - if the user is asking for the current date and time.\n"
+                "RELATIVE_DATETIME - if the user is asking for a date and time relative to now, such as yesterday, tomorrow, last year, next week, or 3 hours from now.\n"
                 "CALCULATOR - if the user is asking to perform a calculation.\n"
                 "NO_TOOL - if the user is asking a question that does not require a tool.\n\n"
 
@@ -55,6 +56,10 @@ def choose_tool(message):
                 "User: What is the capital of France? -> NO_TOOL\n"
                 "User: Who is the president of the United States? -> NO_TOOL\n"
                 "User: Tell me about wolves. -> NO_TOOL\n"
+                "User: What is 3 days from now? -> RELATIVE_DATETIME\n"
+                "User: When is the next full moon? -> RELATIVE_DATETIME\n"
+                "User: When did World War II begin and end? -> RELATIVE_DATETIME\n"
+                "User: What time will it be in 2 hours and 30 minutes? -> RELATIVE_DATETIME\n"
 
                 "Return the label only."
             )
