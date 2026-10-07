@@ -22,7 +22,7 @@ def generate_response(conversation):
         tokenize=False,
         add_generation_prompt=True
     )
-
+# The `generate_response` function takes a conversation history as input, formats it into a prompt using the tokenizer, and then generates a response using the loaded model. The response is returned to be used in the main conversation loop in `brody.py`.
     response = generate(
         model,
         tokenizer,
@@ -31,3 +31,35 @@ def generate_response(conversation):
     )
 
     return response
+
+
+def should_use_datetime(message):
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Decide whether the user's message requires the current real-world date and/or time."
+                "Respond with exactly USE_DATETIME or NO_TOOL."
+            )
+        },
+        {
+            "role": "user",
+            "content": message
+        }
+    ]
+
+
+    prompt = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+
+    decision = generate(
+        model,
+        tokenizer,
+        prompt=prompt,
+        max_tokens=10
+    )
+
+    return decision.strip()
